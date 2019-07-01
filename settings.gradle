@@ -12,5 +12,7 @@ pluginManagement {
 }
 rootProject.name = 'Bike Racks'
 
+enableFeaturePreview("GRADLE_METADATA")
+
 include ':app'
 include ':common'

@@ -9,42 +9,40 @@ import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.JsonSerializer
 import io.ktor.client.features.json.defaultSerializer
-import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.accept
-import io.ktor.client.request.get
-import io.ktor.client.request.header
+import io.ktor.client.request.*
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.http.takeFrom
+import io.ktor.util.KtorExperimentalAPI
+import kotlinx.serialization.json.JSON
+import kotlinx.serialization.json.Json.Companion.nonstrict
+import kotlinx.serialization.json.JsonBuilder
+import kotlinx.serialization.json.json
+
+expect fun getJsonSerializer(): JsonSerializer?
 
 class OverpassApi(private val endPoint: String) {
+
     private val client = HttpClient {
         install(JsonFeature) {
-            defaultSerializer().apply {
-                // read(typeInfo<BikeRacksApiModel>(), )
-            }
-
-            defaultRequest {
-                accept(ContentType.Application.Json)
-            }
+            acceptContentTypes = listOf(ContentType.Application.Json)
+            serializer = getJsonSerializer() ?: defaultSerializer()
         }
     }
 
-
-    val json = io.ktor.client.features.json.defaultSerializer()
     suspend fun getBikeRacks(): BikeRacksApiModel = client.get {
-        apiUrl(endPoint)
-    }
-
-    private fun HttpRequestBuilder.json() {
-        contentType(ContentType.Application.Json)
+        parameter(
+            "data",
+            "[out:json];node[amenity=bicycle_parking](43.46669501043081,-5.708215989569187,43.588927989569186,-5.605835010430813);out;"
+        )
+        apiUrl("/api/interpreter")
     }
 
     private fun HttpRequestBuilder.apiUrl(path: String) {
         url {
             takeFrom(endPoint)
-            encodedPath = "/api/interpreter"
+            encodedPath = path
         }
     }
 }
