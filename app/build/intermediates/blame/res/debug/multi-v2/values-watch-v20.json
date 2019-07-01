@@ -4,7 +4,7 @@
             "outputFile": "/Users/neugartf/develop/Android/Bike Racks/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-watch-v20/values-watch-v20.xml",
             "map": [
                 {
-                    "source": "/Users/neugartf/.gradle/caches/transforms-1/files-1.1/appcompat-v7-28.0.0.aar/6840e920676c7173d314fd1fcd300ae7/res/values-watch-v20/values-watch-v20.xml",
+                    "source": "/Users/neugartf/.gradle/caches/transforms-1/files-1.1/appcompat-v7-28.0.0.aar/c5c108544aaa99dfddb7d2f53543a704/res/values-watch-v20/values-watch-v20.xml",
                     "from": {
                         "startLines": "2,5,8",
                         "startColumns": "4,4,4",
