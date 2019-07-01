@@ -1,5 +1,7 @@
 import kotlinx.serialization.Optional
 import kotlinx.serialization.Serializable
+import repository.model.BikeRack
+import repository.model.Coordinate
 
 
 @Serializable
@@ -20,3 +22,5 @@ data class Elements(
     val uid: Int? = null,
     val tags: Tags
 )
+
+fun Elements.map() = BikeRack(this.id, Coordinate(this.lat, this.lon), this.tags.capacity?.toInt())

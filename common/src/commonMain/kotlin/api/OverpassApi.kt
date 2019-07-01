@@ -22,7 +22,9 @@ import kotlinx.serialization.json.json
 
 expect fun getJsonSerializer(): JsonSerializer?
 
-class OverpassApi(private val endPoint: String) {
+class OverpassApi {
+
+    private val endPoint = "https://www.overpass-api.de"
 
     private val client = HttpClient {
         install(JsonFeature) {
@@ -31,10 +33,10 @@ class OverpassApi(private val endPoint: String) {
         }
     }
 
-    suspend fun getBikeRacks(): BikeRacksApiModel = client.get {
+    suspend fun getBikeRacks(lat1: Double, lng1: Double, lat2: Double, lng2: Double): BikeRacksApiModel = client.get {
         parameter(
             "data",
-            "[out:json];node[amenity=bicycle_parking](43.46669501043081,-5.708215989569187,43.588927989569186,-5.605835010430813);out;"
+            "[out:json];node[amenity=bicycle_parking]($lat1,$lng1,$lat2,$lng2);out;"
         )
         apiUrl("/api/interpreter")
     }
