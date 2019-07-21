@@ -23,4 +23,10 @@ data class Elements(
     val tags: Tags
 )
 
-fun Elements.map() = BikeRack(this.id, Coordinate(this.lat, this.lon), this.tags.capacity?.toInt())
+fun Elements.map() = BikeRack(
+    this.id, Coordinate(this.lat, this.lon), try {
+        this.tags.capacity?.toInt()
+    } catch (e: NumberFormatException) {
+        null
+    }
+)
