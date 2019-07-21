@@ -3,9 +3,9 @@ package sample
 import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import api.OverpassApi
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -13,6 +13,8 @@ import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
+import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
 import com.mapbox.mapboxsdk.location.LocationComponentOptions
@@ -58,6 +60,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
         )
 
         setContentView(R.layout.activity_main)
+
+        fab.setOnClickListener {
+            val lastKnownLocation = mapBoxMap.locationComponent.lastKnownLocation
+
+            mapBoxMap.moveCamera(
+                CameraUpdateFactory.newLatLng(
+                    LatLng(
+                        lastKnownLocation!!.latitude, lastKnownLocation!!.longitude
+                    )
+                )
+            )
+        }
 
         button.setOnClickListener {
             val latLngBounds = mapBoxMap.projection.visibleRegion.latLngBounds
