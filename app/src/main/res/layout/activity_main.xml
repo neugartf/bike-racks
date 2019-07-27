@@ -49,7 +49,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|bottom"
-                android:backgroundTint="@color/primaryColor"
+                app:backgroundTint="@color/primaryColor"
                 app:tint="@color/primaryTextColor"
                 app:srcCompat="@drawable/ic_baseline_gps_not_fixed_24px"
                 android:layout_margin="16dp"/>

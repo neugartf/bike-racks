@@ -33,14 +33,6 @@ import repository.model.BikeRack
 import kotlin.coroutines.CoroutineContext
 
 
-actual class Sample {
-    actual fun checkMe() = 44
-}
-
-actual object Platform {
-    actual val name: String = "Android"
-}
-
 class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListener, CoroutineScope {
 
     private var job: Job = Job()
@@ -62,60 +54,72 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
         setContentView(R.layout.activity_main)
 
         fab.setOnClickListener {
-            val lastKnownLocation = mapBoxMap.locationComponent.lastKnownLocation
+            mapBoxMap.locationComponent.lastKnownLocation?.let {
+                mapBoxMap.easeCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        LatLng(
+                            it.latitude, it.longitude
+                        ), 16.0
+                    ), object : MapboxMap.CancelableCallback {
+                        override fun onCancel() {
+                            // NOP
+                        }
 
-            mapBoxMap.moveCamera(
-                CameraUpdateFactory.newLatLng(
-                    LatLng(
-                        lastKnownLocation!!.latitude, lastKnownLocation!!.longitude
-                    )
+                        override fun onFinish() {
+                            updateVisibleArea()
+                        }
+                    }
                 )
-            )
+            }
         }
 
         button.setOnClickListener {
-            val latLngBounds = mapBoxMap.projection.visibleRegion.latLngBounds
-            launch {
-                val symbolLayerIconFeatureList = mutableListOf<Feature>()
-                getRacks(latLngBounds!!).forEach { bikeRack ->
-                    val coordinate = bikeRack.coordinate
-                    symbolLayerIconFeatureList.add(
-                        Feature.fromGeometry(
-                            Point.fromLngLat(
-                                coordinate.lng,
-                                coordinate.lat
-                            )
-                        )
-                    )
-                }
-
-
-                mapBoxMap.setStyle(Style.LIGHT) { style ->
-                    style.addImage(
-                        "marker-icon-id",
-                        BitmapFactory.decodeResource(
-                            this@MainActivity.resources, R.drawable.mapbox_marker_icon_default
-                        )
-                    )
-                    val geoJsonSource = GeoJsonSource(
-                        "source-id", FeatureCollection.fromFeatures(symbolLayerIconFeatureList)
-                    )
-                    style.addSource(geoJsonSource)
-
-                    val symbolLayer = SymbolLayer("layer-id", "source-id")
-                    symbolLayer.withProperties(
-                        PropertyFactory.iconImage("marker-icon-id"), PropertyFactory.iconAllowOverlap(true),
-                        PropertyFactory.iconOffset(
-                            arrayOf(0f, -9f)
-                        )
-                    )
-                    style.addLayer(symbolLayer)
-                }
-            }
+            updateVisibleArea()
         }
 
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
+    }
+
+    private fun updateVisibleArea() {
+        val latLngBounds = mapBoxMap.projection.visibleRegion.latLngBounds
+        launch {
+            val symbolLayerIconFeatureList = mutableListOf<Feature>()
+            getRacks(latLngBounds!!).forEach { bikeRack ->
+                val coordinate = bikeRack.coordinate
+                symbolLayerIconFeatureList.add(
+                    Feature.fromGeometry(
+                        Point.fromLngLat(
+                            coordinate.lng,
+                            coordinate.lat
+                        )
+                    )
+                )
+            }
+
+
+            mapBoxMap.setStyle(Style.LIGHT) { style ->
+                style.addImage(
+                    "marker-icon-id",
+                    BitmapFactory.decodeResource(
+                        this@MainActivity.resources, R.drawable.mapbox_marker_icon_default
+                    )
+                )
+                val geoJsonSource = GeoJsonSource(
+                    "source-id", FeatureCollection.fromFeatures(symbolLayerIconFeatureList)
+                )
+                style.addSource(geoJsonSource)
+
+                val symbolLayer = SymbolLayer("layer-id", "source-id")
+                symbolLayer.withProperties(
+                    PropertyFactory.iconImage("marker-icon-id"), PropertyFactory.iconAllowOverlap(true),
+                    PropertyFactory.iconOffset(
+                        arrayOf(0f, -9f)
+                    )
+                )
+                style.addLayer(symbolLayer)
+            }
+        }
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -152,6 +156,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
 // Set the LocationComponent's camera mode
                 cameraMode = CameraMode.TRACKING
 
+                zoomWhileTracking(16.0, 750, object : MapboxMap.CancelableCallback {
+                    override fun onFinish() {
+                        updateVisibleArea()
+                    }
+
+                    override fun onCancel() {
+                        // NOP
+                    }
+
+                })
+
 // Set the LocationComponent's render mode
                 renderMode = RenderMode.COMPASS
             }
@@ -180,7 +195,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
             finish()
         }
     }
-
 
     private suspend fun getRacks(latLngBounds: LatLngBounds): List<BikeRack> =
         withContext(Dispatchers.IO) {

@@ -43,7 +43,6 @@ class OverpassApi {
                 parameter(
                     "data",
                     "[out:json];node[amenity=bicycle_parking]($lat1,$lng1,$lat2,$lng2);out 50;"
-                    //"[out:json];node[amenity=bicycle_parking](41.39774567270604,2.2073610319612555,41.413251623343285,2.2203049944921247);out 50;"
                 )
                 apiUrl("/api/interpreter")
             }
