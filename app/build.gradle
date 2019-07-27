@@ -101,6 +101,12 @@ configurations.all {
     }
 }
 
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        freeCompilerArgs = ["-Xallow-result-return-type"]
+    }
+}
+
 // This task attaches native framework built from ios module to Xcode project
 // (see iosApp directory). Don't run this task directly,
 // Xcode runs this task itself during its build process.

@@ -37,20 +37,19 @@ class OverpassApi {
         }
     }
 
-    suspend fun getBikeRacks(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Result<BikeRacksApiModel> {
-        try {
-            val result: BikeRacksApiModel = client.get {
-                parameter(
-                    "data",
-                    "[out:json];node[amenity=bicycle_parking]($lat1,$lng1,$lat2,$lng2);out 50;"
-                )
-                apiUrl("/api/interpreter")
-            }
-            return Result.success(result)
-        } catch (e: Exception) {
-            return Result.failure(e)
+    suspend fun getBikeRacks(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Result<BikeRacksApiModel> = try {
+        val result: BikeRacksApiModel = client.get {
+            parameter(
+                "data",
+                "[out:json];node[amenity=bicycle_parking]($lat1,$lng1,$lat2,$lng2);out 50;"
+            )
+            apiUrl("/api/interpreter")
         }
+        Result.success(result)
+    } catch (e: Exception) {
+        Result.failure(e)
     }
+
 
     private fun HttpRequestBuilder.apiUrl(path: String) {
         url {
