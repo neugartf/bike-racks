@@ -28,12 +28,15 @@
             mapbox:mapbox_cameraTargetLng="2.129720"
             mapbox:mapbox_cameraZoom="15"/>
 
-    <Button
-            android:text="Button"
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:text="Search here"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:layout_editor_absoluteY="624dp"
-            tools:layout_editor_absoluteX="51dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="16dp"
+            app:icon="@drawable/ic_baseline_refresh_24px"
+            app:layout_constraintRight_toRightOf="parent"
             android:id="@+id/button"/>
     <androidx.coordinatorlayout.widget.CoordinatorLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -46,6 +49,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|bottom"
+                android:backgroundTint="@color/primaryColor"
+                app:tint="@color/primaryTextColor"
                 app:srcCompat="@drawable/ic_baseline_gps_not_fixed_24px"
                 android:layout_margin="16dp"/>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
