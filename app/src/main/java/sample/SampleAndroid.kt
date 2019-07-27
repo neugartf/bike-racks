@@ -82,48 +82,48 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
     }
 
     private fun updateVisibleArea() {
-        val latLngBounds = mapBoxMap.projection.visibleRegion.latLngBounds
-        launch {
-            val symbolLayerIconFeatureList = mutableListOf<Feature>()
-            val racks = getRacks(latLngBounds!!)
+        mapBoxMap.projection.visibleRegion.latLngBounds?.let {
+            launch {
+                val symbolLayerIconFeatureList = mutableListOf<Feature>()
+                val racks = getRacks(it)
+                if (racks.isNotEmpty()) {
+                    racks.forEach { bikeRack ->
+                        val coordinate = bikeRack.coordinate
+                        symbolLayerIconFeatureList.add(
+                            Feature.fromGeometry(
+                                Point.fromLngLat(
+                                    coordinate.lng,
+                                    coordinate.lat
+                                )
+                            )
+                        )
+                    }.also {
+                        mapBoxMap.setStyle(Style.LIGHT) { style ->
+                            style.addImage(
+                                "marker-icon-id",
+                                BitmapFactory.decodeResource(
+                                    this@MainActivity.resources, R.drawable.mapbox_marker_icon_default
+                                )
+                            )
+                            val geoJsonSource = GeoJsonSource(
+                                "source-id", FeatureCollection.fromFeatures(symbolLayerIconFeatureList)
+                            )
+                            style.addSource(geoJsonSource)
 
-            if (racks.isNotEmpty()) {
-                racks.forEach { bikeRack ->
-                    val coordinate = bikeRack.coordinate
-                    symbolLayerIconFeatureList.add(
-                        Feature.fromGeometry(
-                            Point.fromLngLat(
-                                coordinate.lng,
-                                coordinate.lat
+                            val symbolLayer = SymbolLayer("layer-id", "source-id")
+                            symbolLayer.withProperties(
+                                PropertyFactory.iconImage("marker-icon-id"), PropertyFactory.iconAllowOverlap(true),
+                                PropertyFactory.iconOffset(
+                                    arrayOf(0f, -9f)
+                                )
                             )
-                        )
-                    )
-                }.also {
-                    mapBoxMap.setStyle(Style.LIGHT) { style ->
-                        style.addImage(
-                            "marker-icon-id",
-                            BitmapFactory.decodeResource(
-                                this@MainActivity.resources, R.drawable.mapbox_marker_icon_default
-                            )
-                        )
-                        val geoJsonSource = GeoJsonSource(
-                            "source-id", FeatureCollection.fromFeatures(symbolLayerIconFeatureList)
-                        )
-                        style.addSource(geoJsonSource)
-
-                        val symbolLayer = SymbolLayer("layer-id", "source-id")
-                        symbolLayer.withProperties(
-                            PropertyFactory.iconImage("marker-icon-id"), PropertyFactory.iconAllowOverlap(true),
-                            PropertyFactory.iconOffset(
-                                arrayOf(0f, -9f)
-                            )
-                        )
-                        style.addLayer(symbolLayer)
+                            style.addLayer(symbolLayer)
+                        }
                     }
-                }
-            } else {
-                Toast.makeText(this@MainActivity, "No racks found", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this@MainActivity, "No racks found", Toast.LENGTH_LONG).show()
 
+                }
             }
         }
     }
@@ -137,10 +137,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
 
     @SuppressLint("MissingPermission")
     private fun enableLocationComponent(loadedMapStyle: Style) {
-// Check if permissions are enabled and if not request
+        // Check if permissions are enabled and if not request
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
 
-// Create and customize the LocationComponent's options
+            // Create and customize the LocationComponent's options
             val customLocationComponentOptions = LocationComponentOptions.builder(this)
                 .trackingGesturesManagement(true)
                 .accuracyColor(ContextCompat.getColor(this, R.color.mapbox_location_layer_blue))
@@ -150,16 +150,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
                 .locationComponentOptions(customLocationComponentOptions)
                 .build()
 
-// Get an instance of the LocationComponent and then adjust its settings
+            // Get an instance of the LocationComponent and then adjust its settings
             mapBoxMap.locationComponent.apply {
 
                 // Activate the LocationComponent with options
                 activateLocationComponent(locationComponentActivationOptions)
 
-// Enable to make the LocationComponent visible
+                // Enable to make the LocationComponent visible
                 isLocationComponentEnabled = true
 
-// Set the LocationComponent's camera mode
+                // Set the LocationComponent's camera mode
                 cameraMode = CameraMode.TRACKING
 
                 zoomWhileTracking(16.0, 750, object : MapboxMap.CancelableCallback {
@@ -170,13 +170,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
                     override fun onCancel() {
                         // NOP
                     }
-
                 })
 
-// Set the LocationComponent's render mode
+                // Set the LocationComponent's render mode
                 renderMode = RenderMode.COMPASS
             }
-
         } else {
             permissionsManager = PermissionsManager(this)
             permissionsManager.requestLocationPermissions(this)
@@ -188,7 +186,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
     }
 
     override fun onExplanationNeeded(permissionsToExplain: List<String>) {
-        // Toast.makeText(this, R.string.user_location_permission_explanation, Toast.LENGTH_LONG).show()
         Toast.makeText(this, "User location explanation", Toast.LENGTH_LONG).show()
     }
 
@@ -196,7 +193,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
         if (granted) {
             enableLocationComponent(mapBoxMap.style!!)
         } else {
-            //Toast.makeText(this, R.string.user_location_permission_not_granted, Toast.LENGTH_LONG).show()
             Toast.makeText(this, "User location not granted", Toast.LENGTH_LONG).show()
             finish()
         }
