@@ -1,4 +1,4 @@
-package sample
+package view
 
 import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
@@ -47,8 +47,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
         super.onCreate(savedInstanceState)
 
         Mapbox.getInstance(
-            this,
-            "pk.eyJ1IjoibmV1Z2FydGYiLCJhIjoiY2pkMjZobHhoMmZieTJ3czZlb2JmczIyaSJ9.N0ziUNQ4Dvmskp-WbmmXrA"
+            this, API_TOKEN
         )
 
         setContentView(R.layout.activity_main)
@@ -57,9 +56,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
             mapBoxMap.locationComponent.lastKnownLocation?.let {
                 mapBoxMap.easeCamera(
                     CameraUpdateFactory.newLatLngZoom(
-                        LatLng(
-                            it.latitude, it.longitude
-                        ), 16.0
+                        LatLng(it.latitude, it.longitude), ZOOM_LEVEL
                     ), object : MapboxMap.CancelableCallback {
                         override fun onCancel() {
                             // NOP
@@ -162,7 +159,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
                 // Set the LocationComponent's camera mode
                 cameraMode = CameraMode.TRACKING
 
-                zoomWhileTracking(16.0, 750, object : MapboxMap.CancelableCallback {
+                zoomWhileTracking(ZOOM_LEVEL, 750, object : MapboxMap.CancelableCallback {
                     override fun onFinish() {
                         updateVisibleArea()
                     }
@@ -207,5 +204,47 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
                 latLngBounds.lonEast
             )
         }
+
+    // Add the mapView's own lifecycle methods to the activity's lifecycle methods
+    public override fun onStart() {
+        super.onStart()
+        mapView.onStart()
+    }
+
+    public override fun onResume() {
+        super.onResume()
+        mapView.onResume()
+    }
+
+    public override fun onPause() {
+        super.onPause()
+        mapView.onPause()
+    }
+
+    public override fun onStop() {
+        super.onStop()
+        mapView.onStop()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView.onLowMemory()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView.onDestroy()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
+    }
+
+    companion object {
+        private const val ZOOM_LEVEL = 16.0
+        private const val API_TOKEN =
+            "pk.eyJ1IjoibmV1Z2FydGYiLCJhIjoiY2pkMjZobHhoMmZieTJ3czZlb2JmczIyaSJ9.N0ziUNQ4Dvmskp-WbmmXrA"
+    }
 }
 

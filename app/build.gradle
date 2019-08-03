@@ -14,8 +14,8 @@ android {
     compileSdkVersion 28
 
     defaultConfig {
-        applicationId 'org.jetbrains.kotlin.mpp_app_android'
-        minSdkVersion 15
+        applicationId 'dev.neugartf.mobility'
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
         versionName '1.0'
