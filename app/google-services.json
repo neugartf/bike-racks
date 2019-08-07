@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "750487876464",
+    "firebase_url": "https://mobility-49a7d.firebaseio.com",
+    "project_id": "mobility-49a7d",
+    "storage_bucket": "mobility-49a7d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:750487876464:android:dc0492c82ae49e89",
+        "android_client_info": {
+          "package_name": "dev.neugartf.mobility"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "750487876464-lrorjah3ur75gpcgcj6ravubbmi6qsj1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs7alaQ3jISjUf7pEXruG3Sbmlt8_5QeQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "750487876464-lrorjah3ur75gpcgcj6ravubbmi6qsj1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
