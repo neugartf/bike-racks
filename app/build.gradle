@@ -5,9 +5,9 @@ repositories {
     google()
     jcenter()
     mavenCentral()
-    maven { url "https://dl.bintray.com/arrow-kt/arrow-kt/" }
 }
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 apply plugin: 'kotlin-android-extensions'
 
 android {
@@ -57,6 +57,15 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.2.1'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:8.1.0'
     implementation 'com.google.android.material:material:1.1.0-alpha09'
+    // Check for v11.4.2 or higher
+    implementation 'com.google.firebase:firebase-core:17.0.1'
+
+    // (Recommended) Add Analytics
+    implementation 'com.google.firebase:firebase-analytics:17.0.1'
+
+    // Add dependency
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+
     implementation project(':common')
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
 }
@@ -136,3 +145,4 @@ task copyFramework {
         }
     }
 }
+apply plugin: 'com.google.gms.google-services'
