@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import api.OverpassApi
+import com.crashlytics.android.Crashlytics
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.geojson.Feature
@@ -29,6 +30,9 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import repository.BikeRackRepository
+import repository.Error
+import repository.Result
+import repository.Success
 import repository.model.BikeRack
 import kotlin.coroutines.CoroutineContext
 
@@ -81,49 +85,59 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
     private fun updateVisibleArea() {
         mapBoxMap.projection.visibleRegion.latLngBounds?.let {
             launch {
-                val symbolLayerIconFeatureList = mutableListOf<Feature>()
-                val racks = getRacks(it)
-                if (racks.isNotEmpty()) {
-                    racks.forEach { bikeRack ->
-                        val coordinate = bikeRack.coordinate
-                        symbolLayerIconFeatureList.add(
-                            Feature.fromGeometry(
-                                Point.fromLngLat(
-                                    coordinate.lng,
-                                    coordinate.lat
-                                )
-                            )
-                        )
-                    }.also {
-                        mapBoxMap.setStyle(Style.LIGHT) { style ->
-                            style.addImage(
-                                "marker-icon-id",
-                                BitmapFactory.decodeResource(
-                                    this@MainActivity.resources, R.drawable.mapbox_marker_icon_default
-                                )
-                            )
-                            val geoJsonSource = GeoJsonSource(
-                                "source-id", FeatureCollection.fromFeatures(symbolLayerIconFeatureList)
-                            )
-                            style.addSource(geoJsonSource)
-
-                            val symbolLayer = SymbolLayer("layer-id", "source-id")
-                            symbolLayer.withProperties(
-                                PropertyFactory.iconImage("marker-icon-id"), PropertyFactory.iconAllowOverlap(true),
-                                PropertyFactory.iconOffset(
-                                    arrayOf(0f, -9f)
-                                )
-                            )
-                            style.addLayer(symbolLayer)
-                        }
+                when (val result = getRacks(it)) {
+                    is Success -> {
+                        showRacks(result.value)
                     }
-                } else {
-                    Toast.makeText(this@MainActivity, "No racks found", Toast.LENGTH_LONG).show()
-
+                    is Error -> {
+                        showError(result)
+                    }
                 }
             }
         }
     }
+
+    private fun showError(result: Error<List<BikeRack>, Throwable>) {
+        Crashlytics.logException(result.value)
+        Toast.makeText(this@MainActivity, result.value.localizedMessage, Toast.LENGTH_LONG).show()
+    }
+
+    private fun showRacks(racks: List<BikeRack>) {
+        val symbolLayerIconFeatureList = mutableListOf<Feature>()
+        racks.forEach { bikeRack ->
+            val coordinate = bikeRack.coordinate
+            symbolLayerIconFeatureList.add(
+                Feature.fromGeometry(
+                    Point.fromLngLat(
+                        coordinate.lng,
+                        coordinate.lat
+                    )
+                )
+            )
+        }
+        mapBoxMap.setStyle(Style.LIGHT) { style ->
+            style.addImage(
+                "marker-icon-id",
+                BitmapFactory.decodeResource(
+                    this@MainActivity.resources, R.drawable.mapbox_marker_icon_default
+                )
+            )
+            val geoJsonSource = GeoJsonSource(
+                "source-id", FeatureCollection.fromFeatures(symbolLayerIconFeatureList)
+            )
+            style.addSource(geoJsonSource)
+
+            val symbolLayer = SymbolLayer("layer-id", "source-id")
+            symbolLayer.withProperties(
+                PropertyFactory.iconImage("marker-icon-id"), PropertyFactory.iconAllowOverlap(true),
+                PropertyFactory.iconOffset(
+                    arrayOf(0f, -9f)
+                )
+            )
+            style.addLayer(symbolLayer)
+        }
+    }
+
 
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapBoxMap = mapboxMap
@@ -195,7 +209,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
         }
     }
 
-    private suspend fun getRacks(latLngBounds: LatLngBounds): List<BikeRack> =
+    private suspend fun getRacks(latLngBounds: LatLngBounds): Result<List<BikeRack>, Throwable> =
         withContext(Dispatchers.IO) {
             BikeRackRepository(OverpassApi()).getBikeRacks(
                 latLngBounds.latSouth,
