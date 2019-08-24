@@ -16,3 +16,4 @@ enableFeaturePreview("GRADLE_METADATA")
 
 include ':app'
 include ':domain'
+include ':api'

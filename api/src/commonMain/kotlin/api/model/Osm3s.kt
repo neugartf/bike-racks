@@ -1,3 +1,6 @@
+package api.model
+
+
 import kotlinx.serialization.Serializable
 
 

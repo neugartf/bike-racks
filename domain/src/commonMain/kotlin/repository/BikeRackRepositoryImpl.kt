@@ -1,8 +1,9 @@
 package repository
 
+
 import api.OverpassApi
-import map
 import repository.model.BikeRack
+import repository.model.map
 import usecase.BikeRackRepository
 
 class BikeRackRepositoryImpl(private val overpassApi: OverpassApi) : BikeRackRepository {

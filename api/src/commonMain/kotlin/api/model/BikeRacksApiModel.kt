@@ -2,8 +2,6 @@ package api.model
 
 
 import kotlinx.serialization.*
-import Osm3s
-import Elements
 
 @Serializable
 data class BikeRacksApiModel(

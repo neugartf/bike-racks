@@ -1,3 +1,5 @@
+package api.model
+
 import kotlinx.serialization.Optional
 import kotlinx.serialization.Serializable
 
