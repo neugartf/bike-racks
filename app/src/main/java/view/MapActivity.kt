@@ -29,11 +29,9 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
-import repository.BikeRackRepository
-import repository.Error
-import repository.Result
-import repository.Success
+import repository.*
 import repository.model.BikeRack
+import usecase.GetBikeRacksUseCase
 import kotlin.coroutines.CoroutineContext
 
 
@@ -211,7 +209,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
 
     private suspend fun getRacks(latLngBounds: LatLngBounds): Result<List<BikeRack>, Throwable> =
         withContext(Dispatchers.IO) {
-            BikeRackRepository(OverpassApi()).getBikeRacks(
+            GetBikeRacksUseCase(BikeRackRepositoryImpl(OverpassApi())).execute(
                 latLngBounds.latSouth,
                 latLngBounds.lonWest,
                 latLngBounds.latNorth,
