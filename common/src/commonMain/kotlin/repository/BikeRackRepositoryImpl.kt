@@ -3,12 +3,13 @@ package repository
 import api.OverpassApi
 import map
 import repository.model.BikeRack
+import usecase.BikeRackRepository
 
-class BikeRackRepository(private val overpassApi: OverpassApi) {
+class BikeRackRepositoryImpl(private val overpassApi: OverpassApi) : BikeRackRepository {
 
     private val cache = hashMapOf<Long, BikeRack>()
 
-    suspend fun getBikeRacks(
+    override suspend fun getBikeRacks(
         lat1: Double,
         lng1: Double,
         lat2: Double,
