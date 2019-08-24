@@ -1,10 +1,10 @@
-package api
+package repository
 
+import api.OverpassApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import repository.BikeRackRepositoryImpl
 
 fun main(args: Array<String>) {
     for (i in 1..20) {

@@ -11,8 +11,6 @@ version '0.0.1'
 
 apply plugin: 'maven-publish'
 
-
-
 kotlin {
     jvm()
     // This is for iPhone emulator
@@ -22,7 +20,6 @@ kotlin {
             framework()
         }
     }
-
     sourceSets {
         commonMain {
             dependencies {
@@ -35,9 +32,6 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$coroutines_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
 
-                api project(':api')
-
-
             }
         }
         commonTest {
@@ -49,6 +43,7 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation kotlin('stdlib')
+
                 implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
 
@@ -86,29 +81,9 @@ kotlin {
     }
 }
 
-
 configurations {
     compileClasspath
 }
-
-task copyFramework {
-    def buildType = project.findProperty('kotlin.build.type') ?: 'DEBUG'
-    def target = project.findProperty('kotlin.target') ?: 'ios'
-    dependsOn kotlin.targets."$target".binaries.getFramework(buildType).linkTask
-
-    doLast {
-        def srcFile = kotlin.targets."$target".binaries.getFramework(buildType).outputFile
-        def targetDir = getProperty('configuration.build.dir')
-        copy {
-            from srcFile.parent
-            into targetDir
-            include 'app.framework/**'
-            include 'app.framework.dSYM'
-        }
-    }
-}
-
-tasks.build.dependsOn copyFramework
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
