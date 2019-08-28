@@ -37,7 +37,7 @@ class OverpassApi {
         }
     }
 
-    suspend fun getBikeRacks(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Result<BikeRacksApiModel> = try {
+    suspend fun getBikeRacks(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Result<BikeRacksApiModel, Throwable> = try {
         val result: BikeRacksApiModel = client.get {
             parameter(
                 "data",
@@ -45,9 +45,9 @@ class OverpassApi {
             )
             apiUrl("/api/interpreter")
         }
-        Result.success(result)
+        Success(result)
     } catch (e: Exception) {
-        Result.failure(e)
+        Error(e)
     }
 
 
@@ -58,3 +58,9 @@ class OverpassApi {
         }
     }
 }
+
+sealed class Result<T, U>
+
+data class Success<T, U>(val value: T) : Result<T, U>()
+
+data class Error<T, U>(val value: U) : Result<T, U>()
