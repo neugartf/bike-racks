@@ -1,7 +1,10 @@
 package repository
 
 
+import api.Error
 import api.OverpassApi
+import api.Result
+import api.Success
 import repository.model.BikeRack
 import repository.model.map
 import usecase.BikeRackRepository
@@ -16,21 +19,21 @@ class BikeRackRepositoryImpl(private val overpassApi: OverpassApi) : BikeRackRep
         lat2: Double,
         lng2: Double
     ): Result<List<BikeRack>, Throwable> =
-        overpassApi.getBikeRacks(lat1, lng1, lat2, lng2).fold({ bikeRacksApiModel ->
-            bikeRacksApiModel.elements.map { it.map() }.also {
-                it.forEach { bikeRack -> cache[bikeRack.id] = bikeRack }
+        when (val result = overpassApi.getBikeRacks(lat1, lng1, lat2, lng2)) {
+            is Success -> {
+                result.value.elements.map { it.map() }.also {
+                    it.forEach { bikeRack -> cache[bikeRack.id] = bikeRack }
+                }
+                Success(cache.values.toList())
             }
-            return Success(cache.values.toList())
-        }, { throwable ->
-            return Error(throwable)
-        })
+            is Error -> {
+                Error(result.value)
+            }
+        }
+
 }
 
-sealed class Result<T, U>
 
-data class Success<T, U>(val value: T) : Result<T, U>()
-
-data class Error<T, U>(val value: U) : Result<T, U>()
 
 
 

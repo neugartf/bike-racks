@@ -10,7 +10,7 @@ pluginManagement {
         }
     }
 }
-rootProject.name = 'Bike Racks'
+rootProject.name = 'BikeRacks'
 
 enableFeaturePreview("GRADLE_METADATA")
 

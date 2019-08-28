@@ -7,6 +7,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import api.OverpassApi
+import api.Result
+import api.Success
 import com.crashlytics.android.Crashlytics
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
@@ -88,14 +90,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
                         showRacks(result.value)
                     }
                     is Error -> {
-                        showError(result)
+                        showError(result as api.Error<List<BikeRack>, Throwable>)
                     }
                 }
             }
         }
     }
 
-    private fun showError(result: Error<List<BikeRack>, Throwable>) {
+    private fun showError(result: api.Error<List<BikeRack>, Throwable>) {
         Crashlytics.logException(result.value)
         Toast.makeText(this@MainActivity, result.value.localizedMessage, Toast.LENGTH_LONG).show()
     }

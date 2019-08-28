@@ -1,6 +1,6 @@
 package usecase
 
-import repository.Result
+import api.Result
 import repository.model.BikeRack
 
 
