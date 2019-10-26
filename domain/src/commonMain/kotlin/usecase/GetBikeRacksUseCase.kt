@@ -18,6 +18,7 @@ class GetBikeRacksUseCase(private val bikeRackRepository: BikeRackRepository) {
         return bikeRackRepository.getBikeRacks(lat1, lng1, lat2, lng2)
     }
 
+    // WTF: suspend is not working on Native
     fun executeiOS(
         lat1: Double,
         lng1: Double,
