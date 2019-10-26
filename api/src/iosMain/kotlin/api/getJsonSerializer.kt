@@ -10,6 +10,7 @@ import io.ktor.client.features.json.serializer.KotlinxSerializer
 
 
 actual fun getJsonSerializer(): JsonSerializer? {
+    // WTF: Native doesnt support reflection for serialization
     return KotlinxSerializer().apply {
         setMapper(BikeRacksApiModel::class, BikeRacksApiModel.serializer())
         setMapper(Osm3s::class, Osm3s.serializer())

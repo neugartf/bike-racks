@@ -58,7 +58,7 @@ class OverpassApi {
         }
     }
 }
-
+// WTF: Arrow just works for Android
 sealed class Result<T, U>
 
 data class Success<T, U>(val value: T) : Result<T, U>()
