@@ -1,5 +1,5 @@
 plugins {
-    id 'kotlin-multiplatform' version '1.3.40'
+    id 'org.jetbrains.kotlin.multiplatform' version '1.3.40'
 }
 repositories {
     jcenter()
@@ -9,8 +9,6 @@ group 'com.example'
 version '0.0.1'
 
 apply plugin: 'maven-publish'
-
-
 
 kotlin {
     jvm()
@@ -26,11 +24,10 @@ kotlin {
         commonMain {
             dependencies {
                 implementation kotlin('stdlib-common')
-                implementation("org.funktionale:funktionale-try:1.2")
 
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$coroutines_version"
 
-                api project(':api')
+                implementation project(':api')
 
 
             }
@@ -57,6 +54,7 @@ kotlin {
         iosMain {
             dependencies {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-native:$coroutines_version"
+                implementation project(':api')
             }
         }
         iosTest {
@@ -87,9 +85,3 @@ task copyFramework {
 }
 
 tasks.build.dependsOn copyFramework
-
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions {
-        freeCompilerArgs = ["-Xallow-result-return-type"]
-    }
-}

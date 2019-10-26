@@ -23,7 +23,7 @@ expect fun getHttpClientEngine(): HttpClientEngine
 
 class OverpassApi {
 
-    private val endPoint = "http://overpass.openstreetmap.fr/api/interpreter"
+    private val endPoint = "https://overpass.kumi.systems"
 
 
     private val client = HttpClient(getHttpClientEngine()) {
