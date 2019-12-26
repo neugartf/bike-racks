@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Bike Rack Finder</string>
+    <string name="no_capacity_information">No capacity information</string>
+    <string name="capacity_information">%d places</string>
+    <string name="search_here">Search Here</string>
+    <string name="available_slots">Available slots</string>
 </resources>

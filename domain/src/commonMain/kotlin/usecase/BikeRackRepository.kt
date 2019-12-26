@@ -11,4 +11,6 @@ interface BikeRackRepository {
         lat2: Double,
         lng2: Double
     ): Result<List<BikeRack>, Throwable>
+
+    suspend fun getBikeRackById(id: Long): Result<BikeRack, Throwable>
 }

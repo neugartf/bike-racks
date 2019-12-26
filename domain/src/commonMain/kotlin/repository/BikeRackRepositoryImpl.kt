@@ -31,6 +31,13 @@ class BikeRackRepositoryImpl(private val overpassApi: OverpassApi) : BikeRackRep
             }
         }
 
+    override suspend fun getBikeRackById(id: Long): Result<BikeRack, Throwable> {
+        cache[id]?.let {
+            return Success(it)
+        }
+        return Error(Throwable("No cached value found."))
+    }
+
 }
 
 

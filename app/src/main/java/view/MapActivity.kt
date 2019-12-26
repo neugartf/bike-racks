@@ -3,14 +3,15 @@ package view
 import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
-import android.widget.Toast.LENGTH_SHORT
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import api.OverpassApi
 import api.Result
 import api.Success
 import com.crashlytics.android.Crashlytics
+import com.google.gson.JsonPrimitive
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.geojson.Point
@@ -31,6 +32,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import repository.BikeRackRepositoryImpl
 import repository.model.BikeRack
+import usecase.GetBikeRackByIdUseCase
 import usecase.GetBikeRacksUseCase
 import kotlin.coroutines.CoroutineContext
 
@@ -41,12 +43,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
 
     private var permissionsManager: PermissionsManager = PermissionsManager(this)
     private lateinit var mapBoxMap: MapboxMap
+    val repositoryImpl = BikeRackRepositoryImpl(OverpassApi())
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
 
         Mapbox.getInstance(
             this, API_TOKEN
@@ -109,7 +113,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
                     coordinate.lng,
                     coordinate.lat
                 )
-            ).withIconImage("marker-icon-id")
+            ).withIconImage("marker-icon-id").withData(JsonPrimitive(bikeRack.id))
 
             symbolLayerIconFeatureList.add(
                 symbolOptions
@@ -123,12 +127,36 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
             style.addImage(
                 "marker-icon-id",
                 BitmapFactory.decodeResource(
-                    this@MainActivity.resources, R.drawable.mapbox_marker_icon_default
+                    this@MainActivity.resources,
+                    R.drawable.mapbox_marker_icon_default
                 )
             )
 
             symbolManager.addClickListener {
-                Toast.makeText(this, it.iconImage, LENGTH_SHORT).show()
+                rackInfoCard.visibility = View.VISIBLE
+                val id = it.data?.asJsonPrimitive?.asLong ?: 0
+                launch {
+                    withContext(Dispatchers.IO) {
+                        when (val result = GetBikeRackByIdUseCase(repositoryImpl).execute(id)) {
+                            is Success ->
+                                withContext(Dispatchers.Main) {
+                                    if (result.value.capacity != null) {
+                                        places.text =
+                                            getString(
+                                                R.string.capacity_information,
+                                                result.value.capacity
+                                            )
+                                    } else {
+                                        places.text = getString(R.string.no_capacity_information)
+                                    }
+                                }
+                            is api.Error ->
+                                withContext(Dispatchers.Main) {
+                                    places.text = getString(R.string.no_capacity_information)
+                                }
+                        }
+                    }
+                }
             }
         }
     }
@@ -212,7 +240,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
 
     private suspend fun getRacks(latLngBounds: LatLngBounds): Result<List<BikeRack>, Throwable> =
         withContext(Dispatchers.IO) {
-            GetBikeRacksUseCase(BikeRackRepositoryImpl(OverpassApi())).execute(
+            GetBikeRacksUseCase(repositoryImpl).execute(
                 latLngBounds.latSouth,
                 latLngBounds.lonWest,
                 latLngBounds.latNorth,
