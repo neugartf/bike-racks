@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import api.OverpassApi
@@ -12,8 +13,6 @@ import api.Success
 import com.crashlytics.android.Crashlytics
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
-import com.mapbox.geojson.Feature
-import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
@@ -26,12 +25,11 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
-import repository.*
+import repository.BikeRackRepositoryImpl
 import repository.model.BikeRack
 import usecase.GetBikeRacksUseCase
 import kotlin.coroutines.CoroutineContext
@@ -103,38 +101,35 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
     }
 
     private fun showRacks(racks: List<BikeRack>) {
-        val symbolLayerIconFeatureList = mutableListOf<Feature>()
+        val symbolLayerIconFeatureList = mutableListOf<SymbolOptions>()
         racks.forEach { bikeRack ->
             val coordinate = bikeRack.coordinate
-            symbolLayerIconFeatureList.add(
-                Feature.fromGeometry(
-                    Point.fromLngLat(
-                        coordinate.lng,
-                        coordinate.lat
-                    )
+            val symbolOptions = SymbolOptions().withGeometry(
+                Point.fromLngLat(
+                    coordinate.lng,
+                    coordinate.lat
                 )
+            ).withIconImage("marker-icon-id")
+
+            symbolLayerIconFeatureList.add(
+                symbolOptions
             )
         }
         mapBoxMap.setStyle(Style.LIGHT) { style ->
+
+            val symbolManager = SymbolManager(mapView, mapBoxMap, style)
+
+            symbolManager.create(symbolLayerIconFeatureList)
             style.addImage(
                 "marker-icon-id",
                 BitmapFactory.decodeResource(
                     this@MainActivity.resources, R.drawable.mapbox_marker_icon_default
                 )
             )
-            val geoJsonSource = GeoJsonSource(
-                "source-id", FeatureCollection.fromFeatures(symbolLayerIconFeatureList)
-            )
-            style.addSource(geoJsonSource)
 
-            val symbolLayer = SymbolLayer("layer-id", "source-id")
-            symbolLayer.withProperties(
-                PropertyFactory.iconImage("marker-icon-id"), PropertyFactory.iconAllowOverlap(true),
-                PropertyFactory.iconOffset(
-                    arrayOf(0f, -9f)
-                )
-            )
-            style.addLayer(symbolLayer)
+            symbolManager.addClickListener {
+                Toast.makeText(this, it.iconImage, LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -144,6 +139,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
         mapBoxMap.setStyle(Style.LIGHT) {
             enableLocationComponent(it)
         }
+
     }
 
     @SuppressLint("MissingPermission")
@@ -157,9 +153,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
                 .accuracyColor(ContextCompat.getColor(this, R.color.mapbox_location_layer_blue))
                 .build()
 
-            val locationComponentActivationOptions = LocationComponentActivationOptions.builder(this, loadedMapStyle)
-                .locationComponentOptions(customLocationComponentOptions)
-                .build()
+            val locationComponentActivationOptions =
+                LocationComponentActivationOptions.builder(this, loadedMapStyle)
+                    .locationComponentOptions(customLocationComponentOptions)
+                    .build()
 
             // Get an instance of the LocationComponent and then adjust its settings
             mapBoxMap.locationComponent.apply {
@@ -192,7 +189,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
