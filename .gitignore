@@ -16,3 +16,4 @@ fastlane
 .DS_Store
 .externalNativeBuild
 keystore.properties
+google-services.json
