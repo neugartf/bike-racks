@@ -16,6 +16,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.http.ContentType
 import io.ktor.http.takeFrom
+import io.ktor.util.KtorExperimentalAPI
 
 expect fun getJsonSerializer(): JsonSerializer?
 
@@ -26,6 +27,7 @@ class OverpassApi {
     private val endPoint = "https://overpass.kumi.systems"
 
 
+    @OptIn(KtorExperimentalAPI::class)
     private val client = HttpClient(getHttpClientEngine()) {
         install(JsonFeature) {
             acceptContentTypes = listOf(ContentType.Application.Json)

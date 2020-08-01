@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
 actual fun getJsonSerializer(): JsonSerializer? =
     GsonSerializer()
 
-@UseExperimental(InternalAPI::class)
+@OptIn(InternalAPI::class)
 actual fun getHttpClientEngine(): HttpClientEngine {
     val okHttpConfig = OkHttpConfig()
     okHttpConfig.config {
